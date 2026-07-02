@@ -117,9 +117,7 @@ CLASS zcl_tablecontent IMPLEMENTATION.
 
   METHOD get_max_rows.
 
-    DATA lv_param TYPE string.
-    io_request->get_form_field( EXPORTING name  = 'maxRows'
-                                 IMPORTING value = lv_param ).
+    DATA(lv_param) = io_request->get_form_field( name = 'maxRows' ).
 
     IF lv_param IS NOT INITIAL AND lv_param CO '0123456789'.
       rv_maxrows = lv_param.
@@ -152,8 +150,9 @@ CLASS zcl_tablecontent IMPLEMENTATION.
 
   METHOD authority_check.
 
-    " Berechtigungsgruppe der Tabelle ermitteln (Standardpruefung wie bei SE16)
-    SELECT SINGLE cclass FROM dd02l
+    " Berechtigungsgruppe der Tabelle ermitteln (Standardpruefung wie bei SE16).
+    " Die Zuordnung Tabelle -> Berechtigungsgruppe steht in TDDAT, nicht in DD02L.
+    SELECT SINGLE cclass FROM tddat
       INTO @DATA(lv_authgrp)
       WHERE tabname = @iv_table.
 
