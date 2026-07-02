@@ -72,6 +72,30 @@ npm run start   # nur zum Testen, siehe oben
 
 ---
 
+## Neues Setup bei einem anderen Kunden (neuer Rechner + neues SAP-System)
+
+Für ein komplett neues Setup bei einem anderen Kunden brauchst du zwei getrennte Teile: Client-Seite (Rechner) und SAP-Seite (System). Nutze dafür das "saubere" Repo `abap-adt` (ohne MCP-Branding), nicht `mcp-abap-adt`.
+
+### 1. Client-Seite (neuer Rechner)
+- Node.js installieren (falls nicht vorhanden)
+- `git clone https://github.com/kalem123/abap-adt.git`
+- `npm install` und `npm run build`
+- `.env` aus `.env.example` neu anlegen mit den Zugangsdaten des neuen Kunden-Systems (URL, User, Client, Passwort/Auth, `TLS_REJECT_UNAUTHORIZED=0` falls Zertifikat selbstsigniert)
+- MCP-Server in Claude Code registrieren (`.mcp.json` bzw. `claude mcp add`, zeigt auf den lokalen `dist`-Ordner)
+
+### 2. SAP-Seite (im Zielsystem, einmalig)
+- Klasse `ZCL_TABLECONTENT` in SE24/ADT anlegen und aktivieren (Quelltext liegt als `ZCL_TABLECONTENT.txt` im Repo)
+- SICF-Knoten `/z_util/z_tablecontent` anlegen (zwei Ebenen: `z_util` als Container, `z_tablecontent` mit Handler-Klasse `ZCL_TABLECONTENT`), Service aktivieren
+- Kurzer Test direkt im Browser: `https://<host>:<port>/z_util/z_tablecontent/T000?maxRows=5` sollte JSON liefern
+
+### 3. Verifizieren
+- Claude Code neu starten (frischer Node-Prozess für den MCP-Server)
+- Testabfrage einer Standardtabelle (`T000`) über `GetTableContents`
+
+Wichtig: Berechtigungen des SAP-Users beim Kunden müssen `S_TABU_DIS` für die relevante Berechtigungsgruppe(n) enthalten, sonst blockt der `AUTHORITY-CHECK` in der Klasse.
+
+---
+
 This guide covers:
 
 1.  **Prerequisites:** What you need before you start.
